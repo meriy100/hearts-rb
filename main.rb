@@ -1,28 +1,27 @@
-# PAIR  = ->(x) { ->(y) { ->(f) { f[x][y] } } }
-# LEFT  = ->(p) { p[->(x) { ->(y) { x } }] }
-# RIGHT = ->(p) { p[->(x) { ->(y) { y } }] }
-# EMPTY = PAIR[T][T]
-# UNSHIFT = -> l { -> x {
-#   PAIR[F][PAIR[x][l]]
-# }}
-#
-# IS_EMPTY = LEFT
-# FIRST = -> l { LEFT[RIGHT[l]] }
-# REST = -> l { RIGHT[RIGHT[l]] }
-
 $memory = Array.new(1024, 0)
 
-WHILE = ->(x) { ->(y) { ->(p) { (p $memory[0...10] ; $memory[p] != 0) ? WHILE[x][y][x[p]] : y[p] } } }
-# IF = ->(x) { ->(y) { ->(z) { x ? y : z } } }
-# PINC = ->(p) { p + 1 } # @return Pointer
+PAIR  = -> x { -> y { -> f { f[x][y] } } }
+LEFT  = -> p { p[-> x { -> y { x } } ] }
+RIGHT = -> p { p[-> x { -> y { y } } ] }
+
+ZERO = -> p { -> x { -> { p } } }
+ONE = -> p { -> x { -> { x[p] } } }
+INCREMENT = -> n { -> p { -> x { p[n[p][x]] } } }
+SLIDE     = -> p { PAIR[RIGHT[p]][INCREMENT[RIGHT[p]]] }
+DECREMENT = -> n { LEFT[n[SLIDE][PAIR[ZERO][ZERO]]] }
+T = -> t { -> f { t } }
+F = -> t { -> f { f } }
+IF = -> b { -> { -> t {  -> f { b[t][f] } } } }
+IS_ZERO = -> n { n[-> x { F }][T] }
+
+WHILE = ->(x) { ->(y) { ->(p) { $memory[p] != 0 ? WHILE[x][y][x[p]] : y[p] } } }
 PINC = ->(n) { ->(p) { n[p + 1] } } # @return Pointer
 PDEC = ->(n) { ->(p) { n[p - 1] } } # @return Pointer
 INC = ->(n) { ->(p) { $memory[p] += 1; n[p] } } # @return Pointer
 DEC = ->(n) { ->(p) { $memory[p] -= 1; n[p] } } # @return Pointer
+GET = ->(n) { ->(p) { $memory[p] = STDIN.getc.ord; n[p] } }
+PUT = ->(n) { ->(p) { STDOUT.print $memory[p].chr('UTF-8'); n[p] } }
 FIN = ->(p) { p }
-
-# DEC[FIN][100]
-# INC[WHILE[PINC[INC[FIN]]][DEC[FIN]]][0]
 
 
 def gem_node(h, hs)
@@ -39,10 +38,16 @@ def gem_node(h, hs)
     WHILE[gem_node(hs.shift, hs)][gem_node(hs.shift, hs)]
   when ']'
     FIN
+  when ','
+    GET[gem_node(hs.shift, hs)]
+  when '.'
+    PUT[gem_node(hs.shift, hs)]
   when nil
     FIN
   end
 end
 
 
-gem_node('+', '+++++++++[>+>+<<-]'.split(''))[0]
+# gem_node(',', '[>+>+<<-]>.>.'.split(''))[0]
+# Hello World!
+gem_node('+', '+++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.'.split(''))[0]
