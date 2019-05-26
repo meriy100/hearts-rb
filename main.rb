@@ -28,7 +28,7 @@ def gem_node(h, hs)
     GET[gem_node(hs.shift, hs)]
   when '.'
     PUT[gem_node(hs.shift, hs)]
-  when nil, "\n"
+  when nil
     FIN
   end
 end
@@ -39,4 +39,4 @@ source_code = <<EOS
 EOS
 
 # Hello World!
-gem_node('>', source_code.split(''))[0]
+gem_node('>', source_code.gsub(/\s/, "").split(''))[0]
