@@ -1,11 +1,17 @@
 $memory = Array.new(1024, 0)
 $stack = []
-$debug_line = [false]
+$debug_line = 0
 def debug(point, command)
   return unless ARGV[0] == '-d'
-  $debug_line[0] = !$debug_line[0]
+  $debug_line += 1
+  if $debug_line % 2 == 0
+    STDERR.print "\e[33m"
+  else
+    STDERR.print "\e[36m"
+  end
+  STDERR.print ("%4d" % $debug_line)
   $memory[0..60].map.with_index(0) do |n, idx|
-    if $debug_line[0]
+    if $debug_line % 2 == 0
       STDERR.print "\e[33m"
     else
       STDERR.print "\e[36m"
@@ -85,9 +91,14 @@ end
 
 
 source_code = <<EOS
->>>>>
+>>>>->
 ++++++++++Sc
 --
+>>>>>>>>>>>>>>>-> ---
+>>>>>>>>>>>>>>>-> ----
+>>>>>>>>>>>>>>>-> -----
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+
 [ # 入力
   >
   g
@@ -112,6 +123,77 @@ source_code = <<EOS
   ) 
 ]
 sc
+++[--<++]--
+
+> # array2 3 に移動
+[ # 文字毎
+  Sc
+  +++[--->+++]--- # array2 に移動
+  [>] sS # array2[n] = s
+  ++++[---->++++]---- # array3 に移動
+  [>] s # array3[n] = s
+  ++[--<++]-- # array1 に移動
+  >[>] # array1[n] に移動
+  - 
+  > 
+]
+++[--<++]-- # array1 に移動
+>[+>]
+
+# array2 から スートだけを取り出し array1へ
+
++++[--->+++]--- # array2 に移動
+>
+[
+  Sc
+  ++[--<++]-- # array1 に移動
+  [>]s #array1[n] = s
+  +++[--->+++]--- # array2 に移動
+  >[>] 
+  ->c->
+]
++++[---<+++]--- # array2 に移動
+>[+>]
+
+# array1 で すべて同じスートならarray1[0] に1 そうでないなら0
+++[--<++]-- # array1 に移動
+>Sc+>
+0
+  >
+  0
+    >
+    0
+      >
+      0
+        >
+      9
+    9
+  9
+9
+(
+  ++[--<++]-- # array1 に移動
+  >[c>]
+)
+++[--<++]-- # array1 に移動
+>>[c>]
+
+
+# array3 から スートだけを取り出し array2へ
+
+++++[---->++++]---- # array3 に移動
+>
+[
+  c->Sc
+  +++[---<+++]--- # array2 に移動
+  [>]s #array2[n] = s
+  ++++[---->++++]---- # array3 に移動
+  >[>] 
+  ->
+]
+++++[----<++++]---- # array3 に移動
+>[+>]
+
+
 EOS
 
 # Hello World!
