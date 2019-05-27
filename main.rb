@@ -88,7 +88,7 @@ source_code = <<EOS
 >>>>>
 ++++++++++Sc
 --
-[
+[ # 入力
   >
   g
   0c9
@@ -111,6 +111,7 @@ source_code = <<EOS
     <
   ) 
 ]
+sc
 EOS
 
 # Hello World!
