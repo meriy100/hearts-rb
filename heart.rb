@@ -13,7 +13,7 @@ def debug(point, command)
     STDERR.print "\e[36m"
   end
   STDERR.print ("%4d " % $debug_line)
-  $💔[0..100].map.with_index(0) do |n, idx|
+  $memory[0..100].map.with_index(0) do |n, idx|
     if $debug_line % 2 == 0
       STDERR.print "\e[33m"
     else
@@ -30,26 +30,26 @@ def debug(point, command)
     end
     STDERR.print " "
   end
-  STDERR.print $💘
+  STDERR.print $stack
   STDERR.print command
   STDERR.puts
 end
 
-WHILE = ->x { ->y { ->p { debug(p, "WHILE"); $💔[p] != 0 ? WHILE[x][y][x[p]] : y[p] } } }
-IF = ->x { ->y { ->p { debug(p, "IF"); $💔[p] != 0 ? y[x[p]] : y[p] } } }
-SIF = ->x { ->y { ->p { debug(p, "SIF"); $💔[p] == $💘.last ? y[x[p]] : y[p] } } }
+WHILE = ->x { ->y { ->p { debug(p, "WHILE"); $memory[p] != 0 ? WHILE[x][y][x[p]] : y[p] } } }
+IF = ->x { ->y { ->p { debug(p, "IF"); $memory[p] != 0 ? y[x[p]] : y[p] } } }
+SIF = ->x { ->y { ->p { debug(p, "SIF"); $memory[p] == $stack.last ? y[x[p]] : y[p] } } }
 PINC = ->n { ->p { debug(p, "PINC"); n[p + 1] } } # @return Pointer
 PDEC = ->n { ->p { debug(p, "PDEC"); n[p - 1] } } # @return Pointer
-INC = ->n { ->p { debug(p, "INC"); $💔[p] += 1; n[p] } } # @return Pointer
-DEC = ->n { ->p { debug(p, "DEC"); $💔[p] -= 1; n[p] } } # @return Pointer
-GET = ->n { ->p { debug(p, "GET"); $💔[p] = STDIN.getc&.ord || 0; n[p] } }
-PUT = ->n { ->p { debug(p, "PUT"); STDOUT.print $💔[p].chr('UTF-8'); n[p] } }
+INC = ->n { ->p { debug(p, "INC"); $memory[p] += 1; n[p] } } # @return Pointer
+DEC = ->n { ->p { debug(p, "DEC"); $memory[p] -= 1; n[p] } } # @return Pointer
+GET = ->n { ->p { debug(p, "GET"); $memory[p] = STDIN.getc&.ord || 0; n[p] } }
+PUT = ->n { ->p { debug(p, "PUT"); STDOUT.print $memory[p].chr('UTF-8'); n[p] } }
 FIN = ->p { debug(p, "FIN"); p }
 
-SWHILE = ->x { ->y { ->p { debug(p, "SWHILE"); $💔[p] != $💘.last ? SWHILE[x][y][x[p]] : y[p] } } }
-SPUSH = ->n { ->p { debug(p, "SPUSH"); $💘.push($💔[p]); n[p] }}
-SPOP = ->n { ->p { debug(p, "SPOP"); $💔[p] = $💘.pop; n[p] }}
-CLEAR = ->n { ->p { debug(p, "CLEAR"); $💔[p] = 0; n[p] }}
+SWHILE = ->x { ->y { ->p { debug(p, "SWHILE"); $memory[p] != $stack.last ? SWHILE[x][y][x[p]] : y[p] } } }
+SPUSH = ->n { ->p { debug(p, "SPUSH"); $stack.push($memory[p]); n[p] }}
+SPOP = ->n { ->p { debug(p, "SPOP"); $memory[p] = $stack.pop; n[p] }}
+CLEAR = ->n { ->p { debug(p, "CLEAR"); $memory[p] = 0; n[p] }}
 
 def gem_node(h, hs)
   case h
